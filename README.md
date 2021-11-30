@@ -1,5 +1,5 @@
 # PeteKitDemos
-Repository containing the code and detailed explanations for the demos shown at the Pete Kit Presentation.
+Repository containing the code and detailed explanations for the demos shown at the Pete Kit Presentation. Navigate to the specific project folders for more detailed explanations. The projects are briefly explained below.
 
 ## Simon
 [Simon](https://en.wikipedia.org/wiki/Simon_(game)) is a game about remembering and repeating color sequences. 
