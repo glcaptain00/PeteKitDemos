@@ -5,6 +5,8 @@ Author: Brent Rubell for Adafruit Industries
 """
 # Import Python System Libraries
 import time
+import json
+
 # Import Blinka Libraries
 import busio
 from digitalio import DigitalInOut, Direction, Pull
@@ -55,24 +57,23 @@ rfm9x = adafruit_rfm9x.RFM9x(spi, CS, RESET, 915.0)
 rfm9x.tx_power = 23
 prev_packet = None
 
+PACKET_TIMEOUT = 5
+
 while True:
     packet = None
     # draw a box to clear the image
     #display.fill(0)
     #display.text('RasPi LoRa Tx', 35, 0, 1)
 
-    # Read ADC
-    voltage=adc.read_raw(1)
-    print(voltage)
-    
-    #bandwidth=rfm9x.signal_bandwidth
-    #print(bandwidth)
-
-    
-    data = bytes(""+str(voltage),"utf-8")
-    rfm9x.send(data)
-    #display.text('Data Sent', 25, 15, 1)
-
-
-    #display.show()
-    time.sleep(0.5)
+    packet = rfm9x.receive(timeout=PACKET_TIMEOUT)
+    if not packet == None:
+        packDat = json.loads(packet)
+        if packDat['command'] == "measure":
+            # Read ADC
+            voltage=adc.read_raw(1)
+            print(voltage)
+            
+            data = bytes(""+str(voltage),"utf-8")
+            rfm9x.send(data)
+        elif packDat['command'] == "water":
+            print(f"Watering: {packDat['active']}")
