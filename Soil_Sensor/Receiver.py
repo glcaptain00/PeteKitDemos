@@ -54,51 +54,6 @@ start = time.time()
 # Time to run
 PERIOD_OF_TIME = 20
 
-# Setup GPS
-gpsReader = serial.Serial("/dev/serial/by-id/usb-u-blox_AG_-_www.u-blox.com_u-blox_7_-_GPS_GNSS_Receiver-if00", 9600, timeout = 5)
-class GPS_TimeSync (threading.Thread):
-    def __init__(self):
-        threading.Thread.__init__(self)
-        self.running = True
-        self.hasFix = False
-        self.lastLat = None
-        self.lastLong = None
-        self.synced = False
-
-    def run(self):
-        global gpsReader
-        while self.running:
-            line = gpsReader.readline().strip().decode('ascii')
-            dat = line.split(',')
-            if (dat[0] == "$GPGGA"):
-                if(dat[1] != ""):
-                    hours = dat[1][0:2]
-                    minutes = dat[1][2:4]
-                    seconds = dat[1][4:6]
-                    curTime = datetime.utcnow()
-                    #print("Syncing system time")
-                    os.system('sudo date -u {:0>2d}{:0>2d}{}{}{}.{}'.format(curTime.month, curTime.day, hours, minutes, curTime.year, seconds))
-                    self.hasFix = True
-                    self.synced = True
-                    self.lastLat = "{} {}".format(dat[2], dat[3]) if dat[2] != "" else "NO FIX"
-                    self.lastLong = "{} {}".format(dat[4], dat[5]) if dat[4] != "" else "NO FIX"
-                else:
-                    print("Failed to sync time with GPS")
-                    self.hasFix = False
-
-gps = GPS_TimeSync()
-gps.start()
-while (gps.synced == False):
-    display.fill(0)
-    display.text('Waiting for initial',0, 0, 1)
-    display.text('time sync...', 0, 10, 1)
-    display.show()
-    if (btnB.value == False):
-        print("Skipping")
-        break
-else:
-    print("Time synced or sync skipped")
-
 temptime = datetime.utcnow()
 filename = "/home/pi/logs/{:0>2d}-{:0>2d}-{:0>2d}_{:0>2d}-{:0>2d}_data_log.csv".format(temptime.month,temptime.day, temptime.year, temptime.hour, temptime.minute)
 file = open(filename, "a")
