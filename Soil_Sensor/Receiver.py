@@ -63,7 +63,7 @@ PACKET_TIMEOUT = 0.5 #seconds
 
 temptime = datetime.utcnow()
 filename = "/home/pi/logs/{:0>2d}-{:0>2d}-{:0>2d}_{:0>2d}-{:0>2d}_data_log.csv".format(temptime.month,temptime.day, temptime.year, temptime.hour, temptime.minute)
-file = open(filename, "a")
+file = open(filename, "w")
 i=0
 if os.stat(filename).st_size == 0:
         file.write("Time,RSSI (dBm),Latitude,Longitude\n")
@@ -73,14 +73,16 @@ shadow_check_time = time.time()
 shadow_water = "false"
 
 while True:
-    if time.time() > shadow_check_time + 60:
+    if time.time() > shadow_check_time + 5:
+        shadow_check_time = time.time()
+        print("Checking thing shadow")
         thingShadow = iot_data_client.get_thing_shadow(thingName=keydata.thingName, shadowName=keydata.shadowName)['payload'].read()
         shadowData = json.loads(thingShadow.decode("utf-8"))
         if not shadow_water == shadowData['state']['desired']['water']:
             packDatW = {}
             packDatW['command'] = "water"
-            packDatW['active'] = shadow_water
-            rfm9x.send(json.dumps(packDatW))
+            packDatW['active'] = shadowData['state']['desired']['water']
+            rfm9x.send(bytearray(json.dumps(packDatW).encode()))
             rfm9x.receive(timeout=5)
             if not packet is None:
                 shadow_water = shadowData['state']['desired']['water']
@@ -95,7 +97,7 @@ while True:
     #send command to measure soil
     packDatM = {}
     packDatM['command'] = "measure"
-    rfm9x.send(json.dumps(packDatM))
+    rfm9x.send(bytearray(json.dumps(packDatM).encode()))
 
     # check for packet rx
     packet = rfm9x.receive(timeout=PACKET_TIMEOUT)
