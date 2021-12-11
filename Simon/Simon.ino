@@ -79,17 +79,17 @@ void showSequence()
       PORTD = PORTD ^ 0b00001000;
       delay(250);
     }
-    else if (sequence[i] == 'G')
+    else if (sequence[i] == 'B')
     {
-      Serial.print('G');
+      Serial.print('B');
       PORTD = PORTD ^ 0b00100000;
       delay(250);
       PORTD = PORTD ^ 0b00100000;
       delay(250);
     }
-    else if (sequence[i] == 'B')
+    else if (sequence[i] == 'G')
     {
-      Serial.print('B');
+      Serial.print('G');
       PORTD = PORTD ^ 0b10000000;
       delay(250);
       PORTD = PORTD ^ 0b10000000;
